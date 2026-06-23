@@ -87,11 +87,6 @@
             box-shadow: 0 0 0 0.25rem rgba(229, 57, 53, 0.15);
         }
 
-        /* Perbaikan input tanpa icon grup jika dibutuhkan */
-        .no-addon {
-            border-radius: 10px !important;
-        }
-
         .btn-login {
             background: linear-gradient(135deg, #e53935 0%, #b71c1c 100%);
             border: none;
@@ -130,7 +125,7 @@
 
         <div class="card-header text-center">
             <div class="brand-logo">
-                <i class="fa-solid fa-dropofblood">🩸</i>
+                <i class="fa-solid fa-droplet"></i>
             </div>
             <h3>Selamat Datang</h3>
             <p class="text-muted small">Silakan login ke akun Donor Darah Anda</p>
@@ -138,10 +133,15 @@
 
         <div class="card-body">
 
+            <!-- Tombol Kembali -->
+            <a href="/" class="btn btn-outline-secondary btn-sm mb-3">
+                <i class="fa-solid fa-arrow-left me-1"></i> Kembali
+            </a>
+
             @if(session('error'))
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="fa-solid fa-circle-exclamation me-2"></i> {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
 
@@ -152,12 +152,8 @@
                     <label class="form-label">Alamat Email</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
-                        <input 
-                            type="email" 
-                            name="email" 
-                            class="form-control" 
-                            placeholder="nama@email.com"
-                            required>
+                        <input type="email" name="email" class="form-control"
+                               placeholder="nama@email.com" required>
                     </div>
                 </div>
 
@@ -165,12 +161,8 @@
                     <label class="form-label">Password</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                        <input 
-                            type="password" 
-                            name="password" 
-                            class="form-control" 
-                            placeholder="••••••••"
-                            required>
+                        <input type="password" name="password" class="form-control"
+                               placeholder="••••••••" required>
                     </div>
                 </div>
 
@@ -181,7 +173,7 @@
             </form>
 
             <div class="text-center register-link mt-4">
-                <span class="text-muted small">Belum punya akun?</span> 
+                <span class="text-muted small">Belum punya akun?</span>
                 <a href="/register" class="small">Daftar Sekarang</a>
             </div>
 
