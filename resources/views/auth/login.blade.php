@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,9 +50,17 @@
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         .card-header h3 {
@@ -117,72 +126,84 @@
         }
     </style>
 </head>
+
 <body>
 
-<div class="login-container">
+    <div class="login-container">
 
-    <div class="card" data-aos="fade-up">
+        <div class="card" data-aos="fade-up">
 
-        <div class="card-header text-center">
-            <div class="brand-logo">
-                <i class="fa-solid fa-droplet"></i>
+            <div class="card-header text-center">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-droplet"></i>
+                </div>
+                <h3>Selamat Datang</h3>
+                <p class="text-muted small">Silakan login ke akun Donor Darah Anda</p>
             </div>
-            <h3>Selamat Datang</h3>
-            <p class="text-muted small">Silakan login ke akun Donor Darah Anda</p>
-        </div>
 
-        <div class="card-body">
+            <div class="card-body">
 
-            <!-- Tombol Kembali -->
-            <a href="/" class="btn btn-outline-secondary btn-sm mb-3">
-                <i class="fa-solid fa-arrow-left me-1"></i> Kembali
-            </a>
+                <!-- Tombol Kembali -->
+                <a href="/" class="btn btn-outline-secondary btn-sm mb-3">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Kembali
+                </a>
 
-            @if(session('error'))
+                @if(session('error'))
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="fa-solid fa-circle-exclamation me-2"></i> {{ session('error') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-            @endif
+                @endif
+                @if ($errors->any())
+                <div class="alert alert-warning">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
 
-            <form action="/login" method="POST">
-                @csrf
 
-                <div class="mb-3">
-                    <label class="form-label">Alamat Email</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
-                        <input type="email" name="email" class="form-control"
-                               placeholder="nama@email.com" required>
+                <form action="/login" method="POST">
+                    @csrf
+
+                    <div class="mb-3">
+                        <label class="form-label">Alamat Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                            <input type="email" name="email" class="form-control"
+                                placeholder="nama@email.com" required>
+                        </div>
                     </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                            <input type="password" name="password" class="form-control"
+                                placeholder="••••••••" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-login w-100 mb-3">
+                        <i class="fa-solid fa-right-to-bracket me-2"></i> Masuk
+                    </button>
+
+                </form>
+
+                <div class="text-center register-link mt-4">
+                    <span class="text-muted small">Belum punya akun?</span>
+                    <a href="/register" class="small">Daftar Sekarang</a>
                 </div>
 
-                <div class="mb-4">
-                    <label class="form-label">Password</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                        <input type="password" name="password" class="form-control"
-                               placeholder="••••••••" required>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-login w-100 mb-3">
-                    <i class="fa-solid fa-right-to-bracket me-2"></i> Masuk
-                </button>
-
-            </form>
-
-            <div class="text-center register-link mt-4">
-                <span class="text-muted small">Belum punya akun?</span>
-                <a href="/register" class="small">Daftar Sekarang</a>
             </div>
 
         </div>
 
     </div>
 
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
