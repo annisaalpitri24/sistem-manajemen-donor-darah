@@ -42,6 +42,7 @@ class UserController extends Controller
             'email'    => $request->email,
             'password' => Hash::make($request->password),
             'role'     => $request->role,
+            'status'   => 'aktif',
         ]);
 
         return redirect()->route('users.index')
@@ -101,5 +102,16 @@ class UserController extends Controller
 
         return redirect()->route('users.index')
             ->with('success', 'User berhasil dihapus');
+    }
+    public function approve($id)
+    {
+        $user = User::findOrFail($id);
+
+        $user->update([
+            'status' => 'approved'
+        ]);
+
+        return redirect()->route('blood-donors.index')
+            ->with('success', 'Pendonor berhasil disetujui');
     }
 }
