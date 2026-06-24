@@ -104,17 +104,36 @@ class BloodDonorController extends Controller
             'address' => $request->address,
         ]);
 
+        if ($donor->user) {
+
+            $donor->user->name = $request->name;
+            $donor->user->email = $request->email;
+
+            if (!empty($request->password)) {
+                $donor->user->password = Hash::make($request->password);
+            }
+
+            $donor->user->save();
+        }
+
         return redirect()->route('blood-donors.index')
             ->with('success', 'Data berhasil diubah');
     }
-
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        BloodDonor::destroy($id);
+        $donor = BloodDonor::findOrFail($id);
 
-        return redirect()->route('blood-donors.index');
+        if ($donor->user_id) {
+            User::destroy($donor->user_id);
+        }
+
+        $donor->delete();
+
+        return redirect()
+            ->route('blood-donors.index')
+            ->with('success', 'Pendonor berhasil dihapus');
     }
 }
