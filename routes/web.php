@@ -60,3 +60,28 @@ Route::middleware(['auth'])->group(function () {
         [PendonorDashboardController::class, 'index']
     );
 });
+Route::middleware(['auth'])->group(function () {
+
+    Route::get(
+        '/pendonor/dashboard',
+        [PendonorDashboardController::class, 'index']
+    );
+
+    Route::get(
+        '/pendonor/profil',
+        [PendonorDashboardController::class, 'profil']
+    );
+
+    Route::get(
+        '/pendonor/riwayat',
+        [PendonorDashboardController::class, 'riwayat']
+    );
+
+    Route::get(
+        '/pendonor/jadwal',
+        [PendonorDashboardController::class, 'jadwal']
+    );
+});
+Route::post('/users/{id}/approve', [UserController::class, 'approve'])
+    ->middleware('auth')
+    ->name('users.approve');
