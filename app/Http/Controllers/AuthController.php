@@ -25,6 +25,21 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials)) {
+
+            // HANYA untuk pendonor
+            if (
+                Auth::user()->role == 'pendonor'
+                && Auth::user()->status == 'pending'
+            ) {
+
+                Auth::logout();
+
+                return back()->with(
+                    'error',
+                    'Akun Anda masih menunggu persetujuan Admin/Petugas.'
+                );
+            }
+
             $request->session()->regenerate();
 
             if (Auth::user()->role == 'admin') {
@@ -34,13 +49,15 @@ class AuthController extends Controller
             if (Auth::user()->role == 'petugas') {
                 return redirect('/petugas/dashboard');
             }
+
             if (Auth::user()->role == 'pendonor') {
                 return redirect('/pendonor/dashboard');
             }
 
             return redirect('/');
-        };
-        return back()->with('error', 'Login gagal');
+        }
+
+        return back()->with('error', 'Email atau Password salah');
     }
 
     // Logout
@@ -67,13 +84,26 @@ class AuthController extends Controller
             'phone' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required|confirmed|min:6',
+        ], [
+            'name.required' => 'Nama wajib diisi.',
+            'blood_type.required' => 'Golongan darah wajib dipilih.',
+            'birth_date.required' => 'Tanggal lahir wajib diisi.',
+            'gender.required' => 'Jenis kelamin wajib dipilih.',
+            'phone.required' => 'Nomor HP wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah terdaftar.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal 6 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'pendonor'
+            'role' => 'pendonor',
+            'status' => 'pending'
         ]);
 
         BloodDonor::create([
@@ -88,6 +118,6 @@ class AuthController extends Controller
         ]);
 
         return redirect('/login')
-            ->with('success', 'Registrasi berhasil');
+            ->with('success', 'Registrasi berhasil, menunggu persetujuan admin.');
     }
 }
