@@ -15,7 +15,10 @@ class RoleMiddleware
             return redirect('/login');
         }
 
-        if (Auth::user()->role != $role) {
+        $roles = explode(',', $role);
+
+
+        if (!in_array(Auth::user()->role, $roles)) {
             abort(403, 'Akses Ditolak');
         }
 
