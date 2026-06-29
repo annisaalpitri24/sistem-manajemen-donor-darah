@@ -7,59 +7,113 @@ use App\Http\Controllers\DonationRecordController;
 use App\Http\Controllers\PendonorDashboardController;
 use App\Http\Controllers\PetugasDashboardController;
 use App\Http\Controllers\UserController;
+use App\Models\BloodDonor;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/login', [AuthController::class, 'showLogin']);
+/*
+|--------------------------------------------------------------------------
+| Landing Page
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/', function () {
+
+
+    $a = BloodDonor::where('blood_type', 'LIKE', 'A%')->count();
+    $b = BloodDonor::where('blood_type', 'LIKE', 'B%')->count();
+    $ab = BloodDonor::where('blood_type', 'LIKE', 'AB%')->count();
+    $o = BloodDonor::where('blood_type', 'LIKE', 'O%')->count();
+
+
+    $laki = BloodDonor::where('gender', 'M')->count();
+    $perempuan = BloodDonor::where('gender', 'F')->count();
+
+
+
+    return view('home', compact(
+
+        'a',
+        'b',
+        'ab',
+        'o',
+        'laki',
+        'perempuan'
+
+    ));
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Authentication
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/login', [AuthController::class, 'showLogin'])
+    ->name('login');
+
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/register', [AuthController::class, 'showRegister']);
+
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/logout', [AuthController::class, 'logout']);
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware('auth');
+/*
+|--------------------------------------------------------------------------
+| Admin
+|--------------------------------------------------------------------------
+*/
 
-Route::get('/', function () {
-    return view('home');
+Route::middleware(['auth', 'role:admin'])->group(function () {
+
+    Route::get(
+        '/admin/dashboard',
+        [AdminDashboardController::class, 'index']
+    );
+
+    Route::resource('users', UserController::class);
 });
-//Route::get('/admin/dashboard', function () {
-//    return view('admin.dashboard');
-//})->middleware('auth');
 
-//Route::get('/petugas/dashboard', function () {
-//    return view('petugas.dashboard');
-//})->middleware('auth');
-
-Route::resource('blood-donors', BloodDonorController::class);
-
-Route::resource('donations', DonationRecordController::class);
-
-Route::get(
-    '/admin/dashboard',
-    [AdminDashboardController::class, 'index']
-)
-    ->middleware(['auth', 'role:admin']);
+/*
+|--------------------------------------------------------------------------
+| Petugas
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware(['auth', 'role:petugas'])->group(function () {
-    Route::get('/petugas/dashboard', [PetugasDashboardController::class, 'index']);
+
+    Route::get(
+        '/petugas/dashboard',
+        [PetugasDashboardController::class, 'index']
+    );
 });
 
-Route::resource('users', UserController::class)
-    ->middleware(['auth', 'role:admin']);
-
-Route::get('/pendonor/dashboard', function () {
-    return view('pendonor.dashboard');
-})->middleware('auth');
+/*
+|--------------------------------------------------------------------------
+| Admin & Petugas
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware(['auth'])->group(function () {
 
-    Route::get(
-        '/pendonor/dashboard',
-        [PendonorDashboardController::class, 'index']
-    );
+    Route::resource('blood-donors', BloodDonorController::class);
+
+    Route::resource('donations', DonationRecordController::class);
+
+    Route::post(
+        '/users/{id}/approve',
+        [UserController::class, 'approve']
+    )->name('users.approve');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Pendonor
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware(['auth'])->group(function () {
 
     Route::get(
@@ -82,6 +136,3 @@ Route::middleware(['auth'])->group(function () {
         [PendonorDashboardController::class, 'jadwal']
     );
 });
-Route::post('/users/{id}/approve', [UserController::class, 'approve'])
-    ->middleware('auth')
-    ->name('users.approve');
