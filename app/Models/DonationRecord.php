@@ -14,6 +14,7 @@ class DonationRecord extends Model
         'blood_pressure',
         'hemoglobin',
         'officer_name',
+        'status',
         'notes'
     ];
 

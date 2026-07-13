@@ -12,23 +12,51 @@ class PetugasDashboardController extends Controller
     {
         $totalDonor = User::where('role', 'pendonor')->count();
 
-        $donorAktif = User::where('role', 'pendonor')->count();
+        $donorAktif = User::where('role', 'pendonor')
+            ->where('status', 'approved')
+            ->count();
 
-        $totalDonasi = DonationRecord::count();
+        $totalDonasi = DonationRecord::where('status', 'diterima')->count();
 
-        $stokA_plus = BloodDonor::where('blood_type', 'A+')->count();
-        $stokA_minus = BloodDonor::where('blood_type', 'A-')->count();
+        $stokA_plus = DonationRecord::where('status', 'diterima')
+            ->whereHas('donor', function ($q) {
+                $q->where('blood_type', 'A+');
+            })->count();
 
-        $stokB_plus = BloodDonor::where('blood_type', 'B+')->count();
-        $stokB_minus = BloodDonor::where('blood_type', 'B-')->count();
+        $stokA_minus = DonationRecord::where('status', 'diterima')
+            ->whereHas('donor', function ($q) {
+                $q->where('blood_type', 'A-');
+            })->count();
 
-        $stokO_plus = BloodDonor::where('blood_type', 'O+')->count();
-        $stokO_minus = BloodDonor::where('blood_type', 'O-')->count();
+        $stokB_plus = DonationRecord::where('status', 'diterima')
+            ->whereHas('donor', function ($q) {
+                $q->where('blood_type', 'B+');
+            })->count();
 
-        $stokAB_plus = BloodDonor::where('blood_type', 'AB+')->count();
-        $stokAB_minus = BloodDonor::where('blood_type', 'AB-')->count();
+        $stokB_minus = DonationRecord::where('status', 'diterima')
+            ->whereHas('donor', function ($q) {
+                $q->where('blood_type', 'B-');
+            })->count();
 
+        $stokO_plus = DonationRecord::where('status', 'diterima')
+            ->whereHas('donor', function ($q) {
+                $q->where('blood_type', 'O+');
+            })->count();
 
+        $stokO_minus = DonationRecord::where('status', 'diterima')
+            ->whereHas('donor', function ($q) {
+                $q->where('blood_type', 'O-');
+            })->count();
+
+        $stokAB_plus = DonationRecord::where('status', 'diterima')
+            ->whereHas('donor', function ($q) {
+                $q->where('blood_type', 'AB+');
+            })->count();
+
+        $stokAB_minus = DonationRecord::where('status', 'diterima')
+            ->whereHas('donor', function ($q) {
+                $q->where('blood_type', 'AB-');
+            })->count();
 
         return view('petugas.dashboard', compact(
             'totalDonor',
@@ -43,5 +71,9 @@ class PetugasDashboardController extends Controller
             'stokAB_plus',
             'stokAB_minus'
         ));
+    }
+    public function profile()
+    {
+        return view('petugas.profile');
     }
 }

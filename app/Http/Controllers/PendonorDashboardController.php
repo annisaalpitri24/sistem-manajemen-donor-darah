@@ -23,21 +23,37 @@ class PendonorDashboardController extends Controller
             ]);
         }
 
+        // Semua riwayat donor
         $donations = $donor->donations()
             ->latest('donation_date')
             ->get();
 
-        $totalDonasi = $donations->count();
+        // Hanya donor yang diterima
+        $acceptedDonations = $donor->donations()
+            ->where('status', 'diterima')
+            ->latest('donation_date')
+            ->get();
 
-        $lastDonation = $donations->first()
-            ? $donations->first()->donation_date
-            : '-';
+        // Total donor yang diterima
+        $totalDonasi = $acceptedDonations->count();
 
-        $nextDonation = $lastDonation != '-'
-            ? Carbon::parse($lastDonation)
-            ->addDays(60)
-            ->format('Y-m-d')
-            : '-';
+        // Donor terakhir yang diterima
+        $lastAccepted = $acceptedDonations->first();
+
+        if ($lastAccepted) {
+
+            $lastDonation = $lastAccepted->donation_date;
+
+            $nextDonation = Carbon::parse($lastDonation)
+                ->addDays(60)
+                ->format('Y-m-d');
+
+        } else {
+
+            $lastDonation = '-';
+            $nextDonation = '-';
+
+        }
 
         return view('pendonor.dashboard', compact(
             'donations',
@@ -46,6 +62,7 @@ class PendonorDashboardController extends Controller
             'nextDonation'
         ));
     }
+
     public function profil()
     {
         return view('pendonor.profil');
@@ -85,19 +102,25 @@ class PendonorDashboardController extends Controller
             ]);
         }
 
+        // Hanya donor yang diterima
         $lastDonation = $donor->donations()
+            ->where('status', 'diterima')
             ->latest('donation_date')
             ->first();
 
         if ($lastDonation) {
+
             $lastDate = $lastDonation->donation_date;
 
             $nextDonation = Carbon::parse($lastDate)
                 ->addDays(60)
                 ->format('Y-m-d');
+
         } else {
+
             $lastDate = '-';
             $nextDonation = '-';
+
         }
 
         return view('pendonor.jadwal', [

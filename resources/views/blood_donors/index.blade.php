@@ -78,18 +78,37 @@
                             <td class="ps-4"> {{ $donor->name }} </td>
                             <td> <span class="badge-blood"> {{ $donor->blood_type }} </span> </td>
                             <td> {{ $donor->phone }} </td>
-                            <td> @if($donor->user && $donor->user->status == 'pending') <span class="badge bg-warning text-dark"> Pending </span> @else <span class="badge bg-success"> Aktif </span> @endif </td>
-                            <td class="text-end pe-4"> @if($donor->user && $donor->user->status == 'pending') <form action="{{ route('users.approve',$donor->user->id) }}" method="POST" style="display:inline"> @csrf <button class="btn btn-success btn-action"> <i class="fa-solid fa-check"></i> Setujui </button> </form> @endif <a href="{{ route('blood-donors.edit',$donor->id) }}" class="btn btn-primary btn-action"> <i class="fa-solid fa-pen"></i> Edit </a>
+                            <td>
+                                @if($donor->user && $donor->user->status == 'pending')
+                                <span class="badge bg-warning text-dark">
+                                    Pending </span>
+                                @else <span class="badge bg-success"> Aktif </span> @endif
+                            </td>
+                            <td class="text-end pe-4"> @if($donor->user && $donor->user->status == 'pending')
+                                <form action="{{ route('users.approve', $donor->user->id) }}" method="POST">
+                                    @csrf
+
+                                    <input type="hidden" name="from" value="blood-donors">
+
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        Setujui
+                                    </button>
+                                </form>
+                                @endif
+                                <a href="{{ route('blood-donors.edit',$donor->id) }}" class="btn btn-primary btn-action"> <i class="fa-solid fa-pen"></i> Edit </a>
                                 <form action="{{ route('blood-donors.destroy',$donor->id) }}" method="POST" style="display:inline"> @csrf @method('DELETE') <button class="btn btn-danger btn-action" onclick="return confirm('Yakin hapus data?')"> <i class="fa-solid fa-trash"></i> Hapus </button> </form>
                             </td>
                         </tr> @empty <tr>
                             <td colspan="5" class="text-center text-muted py-4"> Belum ada data pendonor </td>
                         </tr> @endforelse </tbody>
                 </table>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-center mt-3">
+                        {{ $donors->withQueryString()->links() }}
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

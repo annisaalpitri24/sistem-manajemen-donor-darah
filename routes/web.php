@@ -6,8 +6,10 @@ use App\Http\Controllers\BloodDonorController;
 use App\Http\Controllers\DonationRecordController;
 use App\Http\Controllers\PendonorDashboardController;
 use App\Http\Controllers\PetugasDashboardController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Models\BloodDonor;
+use App\Models\DonationRecord;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,27 +20,44 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
 
+    // STOK DARAH (hanya donor yang diterima)
+    $a = DonationRecord::where('status', 'diterima')
+        ->whereHas('donor', function ($q) {
+            $q->where('blood_type', 'A+')
+                ->orWhere('blood_type', 'A-');
+        })->count();
 
-    $a = BloodDonor::where('blood_type', 'LIKE', 'A%')->count();
-    $b = BloodDonor::where('blood_type', 'LIKE', 'B%')->count();
-    $ab = BloodDonor::where('blood_type', 'LIKE', 'AB%')->count();
-    $o = BloodDonor::where('blood_type', 'LIKE', 'O%')->count();
+    $b = DonationRecord::where('status', 'diterima')
+        ->whereHas('donor', function ($q) {
+            $q->where('blood_type', 'B+')
+                ->orWhere('blood_type', 'B-');
+        })->count();
+
+    $ab = DonationRecord::where('status', 'diterima')
+        ->whereHas('donor', function ($q) {
+            $q->where('blood_type', 'AB+')
+                ->orWhere('blood_type', 'AB-');
+        })->count();
+
+    $o = DonationRecord::where('status', 'diterima')
+        ->whereHas('donor', function ($q) {
+            $q->where('blood_type', 'O+')
+                ->orWhere('blood_type', 'O-');
+        })->count();
 
 
+    // Statistik pendonor berdasarkan jenis kelamin
     $laki = BloodDonor::where('gender', 'M')->count();
+
     $perempuan = BloodDonor::where('gender', 'F')->count();
 
-
-
     return view('home', compact(
-
         'a',
         'b',
         'ab',
         'o',
         'laki',
         'perempuan'
-
     ));
 });
 
@@ -68,11 +87,19 @@ Route::post('/logout', [AuthController::class, 'logout']);
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
+    // Dashboard Admin
     Route::get(
         '/admin/dashboard',
         [AdminDashboardController::class, 'index']
     );
 
+    // Profil Admin (harus login sebagai admin)
+    Route::get(
+        '/admin/profile',
+        [AdminDashboardController::class, 'profile']
+    )->name('admin.profile');
+
+    // CRUD Manajemen User
     Route::resource('users', UserController::class);
 });
 
@@ -84,10 +111,17 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 Route::middleware(['auth', 'role:petugas'])->group(function () {
 
+    // Dashboard Petugas
     Route::get(
         '/petugas/dashboard',
         [PetugasDashboardController::class, 'index']
     );
+
+    // Profil Petugas (harus login sebagai petugas)
+    Route::get(
+        '/petugas/profile',
+        [PetugasDashboardController::class, 'profile']
+    )->name('petugas.profile');
 });
 
 /*
@@ -107,6 +141,7 @@ Route::middleware(['auth'])->group(function () {
         [UserController::class, 'approve']
     )->name('users.approve');
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -135,4 +170,19 @@ Route::middleware(['auth'])->group(function () {
         '/pendonor/jadwal',
         [PendonorDashboardController::class, 'jadwal']
     );
+});
+
+/*
+|--------------------------------------------------------------------------
+| Laporan
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/reports', [ReportController::class, 'index'])
+        ->name('reports.index');
+
+    Route::get('/reports/pdf', [ReportController::class, 'pdf'])
+        ->name('reports.pdf');
 });

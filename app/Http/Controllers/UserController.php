@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BloodDonor;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -11,9 +12,28 @@ class UserController extends Controller
     /**
      * Tampilkan semua data user
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::latest()->get();
+        $search = trim($request->search);
+
+        $users = User::query();
+
+        if (!empty($search)) {
+
+            $users->where(function ($query) use ($search) {
+
+                $query->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('email', 'LIKE', "%{$search}%")
+                    ->orWhere('role', 'LIKE', "%{$search}%")
+                    ->orWhere('status', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $users = $users
+            ->orderBy('id', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
         return view('users.index', compact('users'));
     }
 
@@ -42,7 +62,7 @@ class UserController extends Controller
             'email'    => $request->email,
             'password' => Hash::make($request->password),
             'role'     => $request->role,
-            'status'   => 'aktif',
+            'status'   => 'approved',
         ]);
 
         return redirect()->route('users.index')
@@ -103,7 +123,7 @@ class UserController extends Controller
         return redirect()->route('users.index')
             ->with('success', 'User berhasil dihapus');
     }
-    public function approve($id)
+    public function approve(Request $request, $id)
     {
         $user = User::findOrFail($id);
 
@@ -111,7 +131,18 @@ class UserController extends Controller
             'status' => 'approved'
         ]);
 
-        return redirect()->route('blood-donors.index')
-            ->with('success', 'Pendonor berhasil disetujui');
+        // Tambahkan ke Blood Donor jika belum ada
+        if (!BloodDonor::where('user_id', $user->id)->exists()) {
+
+            BloodDonor::create([
+                'user_id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ]);
+        }
+
+        // Kembali ke halaman sebelumnya
+        return redirect()->back()
+            ->with('success', 'Pendonor berhasil disetujui.');
     }
 }

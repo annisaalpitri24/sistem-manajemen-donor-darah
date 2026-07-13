@@ -18,7 +18,7 @@
         .card {
             border: none;
             border-radius: 15px;
-            box-shadow: 0 0 15px rgba(0,0,0,.08);
+            box-shadow: 0 0 15px rgba(0, 0, 0, .08);
         }
 
         .table th {
@@ -35,189 +35,218 @@
 
 <body>
 
-<div class="container mt-5">
+    <div class="container mt-5">
 
-    <div class="card">
+        <div class="card">
 
-        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
 
-            <h4 class="mb-0">
-                <i class="fas fa-users"></i>
-                Manajemen User
-            </h4>
+                <h4 class="mb-0">
+                    <i class="fas fa-users"></i>
+                    Manajemen User
+                </h4>
 
-            <div>
+                <div>
 
-                <a href="{{ route('users.create') }}"
-                    class="btn btn-light me-2">
-                    <i class="fas fa-plus"></i>
-                    Tambah User
-                </a>
+                    <a href="{{ route('users.create') }}"
+                        class="btn btn-light me-2">
+                        <i class="fas fa-plus"></i>
+                        Tambah User
+                    </a>
 
-                @if(Auth::user()->role == 'admin')
+                    @if(Auth::user()->role == 'admin')
                     <a href="/admin/dashboard"
                         class="btn btn-warning">
                         <i class="fas fa-arrow-left"></i>
                         Kembali
                     </a>
-                @elseif(Auth::user()->role == 'petugas')
+                    @elseif(Auth::user()->role == 'petugas')
                     <a href="/petugas/dashboard"
                         class="btn btn-warning">
                         <i class="fas fa-arrow-left"></i>
                         Kembali
                     </a>
-                @endif
+                    @endif
+
+                </div>
 
             </div>
 
-        </div>
+            <div class="card-body">
 
-        <div class="card-body">
-
-            @if(session('success'))
+                @if(session('success'))
                 <div class="alert alert-success">
                     {{ session('success') }}
                 </div>
-            @endif
+                @endif
 
-            <div class="table-responsive">
+                <!-- FORM SEARCH -->
+                <form action="{{ route('users.index') }}" method="GET">
 
-                <table class="table table-bordered table-hover">
+                    <div class="input-group mb-3">
 
-                    <thead>
-                        <tr>
-                            <th width="5%">No</th>
-                            <th>Nama</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                            <th width="30%">Aksi</th>
-                        </tr>
-                    </thead>
+                        <input
+                            type="text"
+                            name="search"
+                            class="form-control"
+                            placeholder="Cari nama, email, role..."
+                            value="{{ request('search') }}">
 
-                    <tbody>
+                        <button class="btn btn-danger" type="submit">
+                            <i class="fas fa-search"></i> Search
+                        </button>
 
-                        @forelse($users as $user)
+                        @if(request('search'))
+                        <a href="{{ route('users.index') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Reset
+                        </a>
+                        @endif
 
-                        <tr>
+                    </div>
 
-                            <td class="text-center">
-                                {{ $loop->iteration }}
-                            </td>
+                </form>
 
-                            <td>
-                                {{ $user->name }}
-                            </td>
+                <div class="table-responsive">
 
-                            <td>
-                                {{ $user->email }}
-                            </td>
+                    <table class="table table-bordered table-hover">
 
-                            <td class="text-center">
+                        <thead>
+                            <tr>
+                                <th width="5%">No</th>
+                                <th>Nama</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th width="30%">Aksi</th>
+                            </tr>
+                        </thead>
 
-                                @if($user->role == 'admin')
+                        <tbody>
+
+                            @forelse($users as $user)
+
+                            <tr>
+
+                                <td class="text-center">
+                                    {{ $users->firstItem() + $loop->index }}
+                                </td>
+
+                                <td>
+                                    {{ $user->name }}
+                                </td>
+
+                                <td>
+                                    {{ $user->email }}
+                                </td>
+
+                                <td class="text-center">
+
+                                    @if($user->role == 'admin')
                                     <span class="badge bg-danger">
                                         Admin
                                     </span>
-                                @elseif($user->role == 'petugas')
+                                    @elseif($user->role == 'petugas')
                                     <span class="badge bg-primary">
                                         Petugas
                                     </span>
-                                @else
+                                    @else
                                     <span class="badge bg-secondary">
                                         Pendonor
                                     </span>
-                                @endif
+                                    @endif
 
-                            </td>
+                                </td>
 
-                            <td class="text-center">
+                                <td class="text-center">
 
-                                @if($user->status == 'pending')
+                                    @if($user->status == 'pending')
                                     <span class="badge bg-warning text-dark">
                                         Pending
                                     </span>
-                                @else
+                                    @else
                                     <span class="badge bg-success">
                                         Aktif
                                     </span>
-                                @endif
+                                    @endif
 
-                            </td>
+                                </td>
 
-                            <td>
+                                <td>
 
-                                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                                    <div class="d-flex gap-2 justify-content-center flex-wrap">
 
-                                    @if($user->status == 'pending')
+                                        @if($user->status == 'pending')
 
-                                        <form action="{{ route('users.approve', $user->id) }}"
+                                        <form action="{{ route('users.approve', $user->id) }}" method="POST">
+                                            @csrf
+
+                                            <input type="hidden" name="from" value="users">
+
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                <i class="fas fa-check"></i>
+                                                Setujui
+                                            </button>
+                                        </form>
+
+                                        @endif
+
+                                        <a href="{{ route('users.edit',$user->id) }}"
+                                            class="btn btn-primary btn-sm">
+
+                                            <i class="fas fa-edit"></i>
+                                            Edit
+
+                                        </a>
+
+                                        <form action="{{ route('users.destroy',$user->id) }}"
                                             method="POST">
 
                                             @csrf
+                                            @method('DELETE')
 
                                             <button type="submit"
-                                                class="btn btn-success btn-sm">
-                                                <i class="fas fa-check"></i>
-                                                Setujui
+                                                class="btn btn-danger btn-sm"
+                                                onclick="return confirm('Yakin ingin menghapus user ini?')">
+
+                                                <i class="fas fa-trash"></i>
+                                                Hapus
+
                                             </button>
 
                                         </form>
 
-                                    @endif
+                                    </div>
 
-                                    <a href="{{ route('users.edit',$user->id) }}"
-                                        class="btn btn-primary btn-sm">
+                                </td>
 
-                                        <i class="fas fa-edit"></i>
-                                        Edit
+                            </tr>
 
-                                    </a>
+                            @empty
 
-                                    <form action="{{ route('users.destroy',$user->id) }}"
-                                        method="POST">
+                            <tr>
+                                <td colspan="6" class="text-center">
+                                    Tidak ada data user
+                                </td>
+                            </tr>
 
-                                        @csrf
-                                        @method('DELETE')
+                            @endforelse
 
-                                        <button type="submit"
-                                            class="btn btn-danger btn-sm"
-                                            onclick="return confirm('Yakin ingin menghapus user ini?')">
+                        </tbody>
 
-                                            <i class="fas fa-trash"></i>
-                                            Hapus
+                    </table>
 
-                                        </button>
+                </div>
 
-                                    </form>
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-
-                        @empty
-
-                        <tr>
-                            <td colspan="6" class="text-center">
-                                Tidak ada data user
-                            </td>
-                        </tr>
-
-                        @endforelse
-
-                    </tbody>
-
-                </table>
+                <!-- Pagination -->
+                <div class="d-flex justify-content-center mt-3">
+                    {{ $users->withQueryString()->links() }}
+                </div>
 
             </div>
-
         </div>
 
     </div>
 
-</div>
-
 </body>
+
 </html>

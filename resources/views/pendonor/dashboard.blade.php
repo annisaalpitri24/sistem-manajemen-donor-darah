@@ -165,6 +165,8 @@
                     <th>Tanggal</th>
                     <th>Lokasi</th>
                     <th>Jumlah</th>
+                    <th>Status</th>
+
                 </tr>
 
                 @forelse($donations ?? [] as $donation)
@@ -173,12 +175,27 @@
                     <td>{{ $donation->donation_date }}</td>
                     <td>{{ $donation->location }}</td>
                     <td>{{ $donation->amount_ml }} ml</td>
+                    <td>
+                        @if($donation->status == 'diterima')
+                            <span class="badge bg-success">
+                                Diterima
+                            </span>
+                        @elseif($donation->status == 'ditolak')
+                            <span class="badge bg-danger">
+                                Ditolak
+                            </span>
+                        @else
+                            <span class="badge bg-warning text-dark">
+                                Pending
+                            </span>
+                        @endif
+                    </td>
                 </tr>
 
                 @empty
 
                 <tr>
-                    <td colspan="3" class="text-center">
+                    <td colspan="4" class="text-center">
                         Belum ada riwayat donor
                     </td>
                 </tr>

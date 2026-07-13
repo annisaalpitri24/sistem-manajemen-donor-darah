@@ -19,7 +19,7 @@ class BloodDonorController extends Controller
         $donors = BloodDonor::when($search, function ($query, $search) {
             return $query->where('name', 'like', "%{$search}%")
                 ->orWhere('blood_type', 'like', "%{$search}%");
-        })->get();
+       })->paginate(10);
 
         return view('blood_donors.index', compact('donors'));
     }

@@ -20,8 +20,8 @@ class DonationRecordController extends Controller
                 $query->whereHas('donor', function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%");
                 });
-            })
-            ->get();
+           })->paginate(10);
+
 
         return view('donations.index', compact('donations'));
     }
@@ -41,15 +41,27 @@ class DonationRecordController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'donor_id' => 'required',
+            'donation_date' => 'required|date',
+            'status' => 'required|in:diterima,ditolak',
+        ]);
+
         DonationRecord::create($request->all());
 
-        $donor = BloodDonor::find($request->donor_id);
+        // Tambah riwayat donor hanya jika diterima
+        if ($request->status == 'diterima') {
 
-        $donor->total_donations += 1;
-        $donor->last_donation_date = $request->donation_date;
-        $donor->save();
+            $donor = BloodDonor::findOrFail($request->donor_id);
 
-        return redirect()->route('donations.index');
+            $donor->total_donations += 1;
+            $donor->last_donation_date = $request->donation_date;
+            $donor->save();
+        }
+
+        return redirect()
+            ->route('donations.index')
+            ->with('success', 'Data donor berhasil disimpan.');
     }
 
     /**
@@ -76,6 +88,10 @@ class DonationRecordController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $request->validate([
+            'status' => 'required|in:diterima,ditolak',
+        ]);
+
         $donation = DonationRecord::findOrFail($id);
 
         $donation->update($request->all());
